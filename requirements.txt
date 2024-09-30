@@ -5,3 +5,5 @@ webdriver-manager
 Flask-WTF
 gunicorn
 opencv-python
+Pillow
+

@@ -1,3 +1,6 @@
-flask
+Flask
 selenium
-opencv-python
+beautifulsoup4
+webdriver-manager
+gunicorn
+

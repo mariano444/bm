@@ -14,15 +14,24 @@ from selenium.webdriver.chrome.options import Options
 
 def get_headless_driver():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("window-size=1920,1080")
-    chrome_options.add_argument("start-maximized")
-    chrome_options.add_argument('--disable-blink-features=AutomationControlled')
-    return webdriver.Chrome(options=chrome_options)
+    chrome_options.add_argument("--headless")  # Ejecutar en modo sin cabeza
+    chrome_options.add_argument("--disable-gpu")  # Desactivar GPU en entornos sin interfaz gráfica
+    chrome_options.add_argument("--no-sandbox")  # Necesario para algunos entornos
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Usar /tmp en lugar de /dev/shm
+
+    # Especifica la ubicación de Google Chrome, si es necesario
+    chrome_options.binary_location = "/usr/bin/google-chrome-stable"
+
+    # Especifica el path del ChromeDriver
+    chrome_driver_path = "/usr/local/bin/chromedriver"  # Ajusta esto si es necesario
+
+    # Crea el servicio de ChromeDriver
+    service = Service(chrome_driver_path)
+
+    # Inicializa el WebDriver
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    return driver
 
 # Configurar la aplicación Flask
 app = Flask(__name__)

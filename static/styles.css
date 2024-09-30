@@ -1,0 +1,19 @@
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+h2 {
+    color: #f39c12;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.form-control {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+.btn-primary {
+    background-color: #f39c12;
+    border-color: #f39c12;
+}

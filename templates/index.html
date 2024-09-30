@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <h2 class="text-center">Automatización de Publicaciones</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.username.label(class="form-label") }}
+                {{ form.username(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.num_publications.label(class="form-label") }}
+                {{ form.num_publications(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.localidad.label(class="form-label") }}
+                {{ form.localidad(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.phrases.label(class="form-label") }}
+                {{ form.phrases(class="form-control", rows="5", placeholder="Ingresa hasta 10 frases separadas por comas") }}
+                <small class="text-muted">Por ejemplo: ¡Oferta Especial!, Últimas Unidades, Nuevo</small>
+            </div>            
+            
+            <!-- Resto del formulario -->
+            <div class="mb-3">
+                {{ form.marca.label(class="form-label") }}
+                {{ form.marca(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.modelo.label(class="form-label") }}
+                {{ form.modelo(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.precio.label(class="form-label") }}
+                {{ form.precio(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.millaje.label(class="form-label") }}
+                {{ form.millaje(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.descripcion.label(class="form-label") }}
+                {{ form.descripcion(class="form-control") }}
+            </div>
+
+            <!-- Campo de carga de imágenes -->
+            <div class="mb-3">
+                {{ form.imagenes.label(class="form-label") }}
+                {{ form.imagenes(class="form-control", multiple=True) }}
+                <small class="text-muted">Sube hasta 30 imágenes</small>
+            </div>
+
+            <div id="image-preview" class="mb-3"></div>
+
+            <button type="submit" class="btn btn-primary">Realizar Publicaciones</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const inputElement = document.getElementById('{{ form.imagenes.id }}');
+    const previewContainer = document.getElementById('image-preview');
+    let imageFiles = [];
+
+    // Función para limitar el número de frases
+    document.querySelector('form').addEventListener('submit', function(event) {
+        const phrases = document.getElementById('phrases').value.split(',').map(p => p.trim());
+        if (phrases.length > 10) {
+            alert("Solo puedes ingresar hasta 10 frases.");
+            event.preventDefault(); // Prevenir el envío del formulario
+        }
+    });
+
+        // Función para renderizar la vista previa de las imágenes
+        function renderPreviews() {
+            previewContainer.innerHTML = '';  // Limpiar la vista previa
+            imageFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageWrapper = document.createElement('div');
+                    imageWrapper.style.position = 'relative';
+                    imageWrapper.style.display = 'inline-block';
+                    imageWrapper.style.margin = '10px';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '150px';
+
+                    // Botón de eliminar imagen
+                    const removeBtn = document.createElement('span');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '5px';
+                    removeBtn.style.right = '5px';
+                    removeBtn.style.backgroundColor = 'red';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.borderRadius = '50%';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.onclick = function() {
+                        removeImage(index);
+                    };
+
+                    imageWrapper.appendChild(img);
+                    imageWrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(imageWrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Función para eliminar una imagen de la lista
+        function removeImage(index) {
+            imageFiles.splice(index, 1);  // Eliminar el archivo de la lista
+            renderPreviews();  // Volver a renderizar la vista previa
+        }
+
+        // Escuchar el cambio en el input de imágenes
+        inputElement.addEventListener('change', function() {
+            const files = Array.from(inputElement.files);
+            if (files.length + imageFiles.length > 100) {
+                alert("Solo puedes cargar un máximo de 100 imágenes.");
+                return;
+            }
+            imageFiles = imageFiles.concat(files);  // Agregar las nuevas imágenes
+            renderPreviews();  // Renderizar la vista previa
+        });
+    </script>
+{% endblock %}

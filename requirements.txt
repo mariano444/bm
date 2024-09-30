@@ -6,4 +6,4 @@ Flask-WTF
 gunicorn
 opencv-python
 Pillow
-
+matplotlib

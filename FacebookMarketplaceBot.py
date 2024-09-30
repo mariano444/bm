@@ -13,13 +13,10 @@ from image_editor import apply_professional_design
 from localidades import localidades_argentinas  # Importamos las localidades desde el archivo
 
 class FacebookMarketplaceBot:
-    def __init__(self, username, password):
+    def __init__(self, username, password, driver):
         self.username = username
         self.password = password
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--disable-notifications")
-        self.driver = webdriver.Chrome(options=chrome_options)
-        self.wait = WebDriverWait(self.driver, 20)
+        self.driver = driver  # Aquí es donde se asigna el WebDriver
 
     def login(self):
         try:

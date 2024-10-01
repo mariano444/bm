@@ -7,6 +7,7 @@ from FacebookMarketplaceBot import FacebookMarketplaceBot
 from localidades import localidades_argentinas
 import random, os
 from werkzeug.utils import secure_filename
+from selenium.webdriver.chrome.service import Service
 
 # Configuración para Selenium en modo headless
 from selenium import webdriver
@@ -14,23 +15,18 @@ from selenium.webdriver.chrome.options import Options
 
 def get_headless_driver():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Ejecutar en modo sin cabeza
-    chrome_options.add_argument("--disable-gpu")  # Desactivar GPU en entornos sin interfaz gráfica
-    chrome_options.add_argument("--no-sandbox")  # Necesario para algunos entornos
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Usar /tmp en lugar de /dev/shm
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.binary_location = "/usr/bin/google-chrome-stable"  # Ajusta según la instalación de tu sistema
 
-    # Especifica la ubicación de Google Chrome, si es necesario
-    chrome_options.binary_location = "/usr/bin/google-chrome-stable"
-
-    # Especifica el path del ChromeDriver
-    chrome_driver_path = "/usr/local/bin/chromedriver"  # Ajusta esto si es necesario
-
-    # Crea el servicio de ChromeDriver
+    # Cambia a la ruta correcta donde está instalado tu chromedriver
+    chrome_driver_path = "/usr/bin/chromedriver"
     service = Service(chrome_driver_path)
-
+    
     # Inicializa el WebDriver
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    
     return driver
 
 # Configurar la aplicación Flask
@@ -40,7 +36,6 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['MODIFIED_UPLOAD_FOLDER'] = 'modified_uploads/'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Máximo 16 MB
 
-# Crear carpetas si no existen
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['MODIFIED_UPLOAD_FOLDER'], exist_ok=True)
 
@@ -49,14 +44,13 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Configurar el logger para monitorear las publicaciones
+# Logger para monitorear las publicaciones
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Variable global para controlar las fotos ya publicadas
+# Global para controlar las fotos ya publicadas
 imagenes_publicadas = set()
 
-# Función para formatear la descripción
 def formatear_descripcion(texto):
     lineas = texto.split('\n')
     lineas_limpias = [f'"{linea.strip()} \\n"' for linea in lineas if linea.strip()]
@@ -73,11 +67,8 @@ def index():
         password = form.password.data
         num_publications = form.num_publications.data
         selected_localities = form.localidad.data
-
         frases_usuario = form.phrases.data
-        frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()] 
-        if len(frases_lista) > 10:
-            frases_lista = frases_lista[:10]
+        frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()][:10] 
 
         marca = form.marca.data
         modelo = form.modelo.data
@@ -117,7 +108,6 @@ def index():
             }
 
             assigned_location = localidades_asignadas[i]
-
             imagenes_disponibles = list(set(imagenes_guardadas) - imagenes_publicadas)
             if len(imagenes_disponibles) == 0:
                 imagenes_publicadas.clear()

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: flask-app
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      sudo apt-get update
+      sudo apt-get install -y wget unzip
+      wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      sudo apt install ./google-chrome-stable_current_amd64.deb
+      wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+      unzip chromedriver_linux64.zip
+      sudo mv chromedriver /usr/bin/chromedriver
+    startCommand: python app.py

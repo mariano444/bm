@@ -81,8 +81,8 @@ def index():
         files = [('imagenes', (os.path.basename(image), open(image, 'rb'), 'image/jpeg')) for image in imagenes_guardadas]
 
         try:
-            # Enviar solicitud al servidor local
-            response = requests.post('http://localhost:5001/process', data=data, files=files)
+            # Cambia localhost por la URL de tu túnel
+            response = requests.post('https://459b117566c86eb05ad6c1e7e3d525ac.serveo.net/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')
             else:

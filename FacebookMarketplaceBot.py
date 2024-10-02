@@ -13,10 +13,13 @@ from image_editor import apply_professional_design
 from localidades import localidades_argentinas  # Importamos las localidades desde el archivo
 
 class FacebookMarketplaceBot:
-    def __init__(self, username, password, driver):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.driver = driver  # Aquí es donde se asigna el WebDriver
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--disable-notifications")
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.wait = WebDriverWait(self.driver, 20)
 
     def login(self):
         try:
@@ -106,7 +109,7 @@ class FacebookMarketplaceBot:
 
     def modify_and_save_photo(self, original_path, modified_path, frases):
         """
-        Modifica la imagen usando la función `apply_professional_design` y la guarda.
+        Modifica la imagen usando la función apply_professional_design y la guarda.
         """
         try:
             # Leer la imagen original usando OpenCV
@@ -135,28 +138,13 @@ class FacebookMarketplaceBot:
     def fill_description(self, description):
         try:
             description_field = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "textarea.x1i10hfl")))
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", description_field)
             description_field.clear()
-            
-            # Dividir el texto en partes más pequeñas
-            description_parts = description.split('\n')  # Divide por líneas, o por cualquier otro delimitador si es necesario
-            
-            for part in description_parts:
-                # Enviar cada parte de la descripción
-                for char in part:
-                    description_field.send_keys(char)  # Envía carácter por carácter
-                    time.sleep(0.05)  # Pausa breve entre cada carácter para evitar errores
-                description_field.send_keys(Keys.SHIFT, Keys.ENTER)  # Añadir salto de línea entre partes, si es necesario
-                time.sleep(0.5)  # Pausa breve entre cada parte
-            
+            description_field.send_keys(description)
             print("Descripción completada automáticamente.")
-        
         except TimeoutException:
             print("Tiempo de espera agotado para el campo de descripción.")
-        
         except Exception as e:
             print(f"Error al completar la descripción: {e}")
-
 
     def select_option(self, category, option):
         try:

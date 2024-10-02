@@ -82,7 +82,7 @@ def index():
 
         try:
             # Cambia localhost por la URL de tu túnel
-            response = requests.post('https://459b117566c86eb05ad6c1e7e3d525ac.serveo.net/process', data=data, files=files)
+            response = requests.post('https://0da80c72f3e1a5566208fe7cd9bd2cdf.serveo.net/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')
             else:

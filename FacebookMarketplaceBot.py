@@ -16,10 +16,12 @@ class FacebookMarketplaceBot:
         self.username = username
         self.password = password
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")  # Modo sin cabeza (headless)
-        chrome_options.add_argument("--disable-notifications")
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')  # Maneja el límite de memoria
+        chrome_options.add_argument("--headless")  # Ejecutar en modo headless
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Desactivar /dev/shm
+        chrome_options.add_argument("--disable-software-rasterizer")  # Desactivar rasterizador
+        chrome_options.add_argument("--no-sandbox")  # No usar sandbox
+        chrome_options.add_argument("--disable-gpu")  # Desactivar GPU
+        chrome_options.add_argument("--window-size=1920x1080")  # Tamaño de ventana
         self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
 

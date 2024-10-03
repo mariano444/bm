@@ -70,6 +70,7 @@
 
             <button type="submit" class="btn btn-primary">Realizar Publicaciones</button>
         </form>
+        <div id="progress-message"></div>
     </div>
 </div>
 
@@ -140,5 +141,19 @@
             imageFiles = imageFiles.concat(files);  // Agregar las nuevas imágenes
             renderPreviews();  // Renderizar la vista previa
         });
+
+    const socket = io();
+
+    // Escuchar eventos de progreso
+    socket.on('progress', function(data) {
+        const progressMessage = document.getElementById('progress-message');
+        progressMessage.innerHTML += `<p>${data.message}</p>`;
+    });
+
+    // Reiniciar el formulario después de las publicaciones
+    function resetForm() {
+        document.querySelector('form').reset();
+        document.getElementById('image-preview').innerHTML = '';  // Limpiar previsualización de imágenes
+    }
     </script>
 {% endblock %}

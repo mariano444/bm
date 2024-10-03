@@ -16,7 +16,10 @@ class FacebookMarketplaceBot:
         self.username = username
         self.password = password
         chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")  # Modo sin cabeza (headless)
         chrome_options.add_argument("--disable-notifications")
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')  # Maneja el límite de memoria
         self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
 

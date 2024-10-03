@@ -7,20 +7,7 @@ from localidades import localidades_argentinas
 import random, os
 from werkzeug.utils import secure_filename
 
-# Función para formatear la descripción
-#def formatear_descripcion(texto):
-    # Dividir el texto en líneas
-    #lineas = texto.split('\n')
-    
-    # Limpiar las líneas y agregar \n para cada línea
-    #lineas_limpias = [f'"{linea.strip()} \\n"' for linea in lineas if linea.strip()]
-    
-    # Formatear el bloque como un string multilínea para el código Python
- #   descripcion_formateada = 'description = (\n' + '    '.join(lineas_limpias) + '\n)'
-    
-  #  return descripcion_formateada
-
-# Configurar la aplicación Flask
+# Configuración de Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads/'
@@ -33,10 +20,11 @@ os.makedirs(app.config['MODIFIED_UPLOAD_FOLDER'], exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+# Función para verificar si el archivo es permitido
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Variable global para controlar las fotos ya publicadas
+# Variable global para las imágenes publicadas
 imagenes_publicadas = set()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -45,30 +33,23 @@ def index():
     form.localidad.choices = [(loc, loc) for loc in localidades_argentinas]
 
     if form.validate_on_submit():
+        # Datos del formulario
         username = form.username.data
         password = form.password.data
         num_publications = form.num_publications.data
         selected_localities = form.localidad.data
-
-        # Capturar las frases ingresadas por el usuario
-        frases_usuario = form.phrases.data
-        frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()] 
-
-        # Asegurar que no se excedan 10 frases
-        if len(frases_lista) > 10:
-            frases_lista = frases_lista[:10]
-
-        # Extraer datos del formulario
         marca = form.marca.data
         modelo = form.modelo.data
         precio = form.precio.data
         millaje = form.millaje.data
         descripcion = form.descripcion.data
-        
-        # Aquí es donde se formatea la descripción formatear_descripcion(descripcion) antes de usarla en el bot
-        descripcion_formateada = descripcion
 
-        # Manejar las imágenes subidas
+        # Frases ingresadas por el usuario
+        frases_usuario = form.phrases.data
+        frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()] 
+        frases_lista = frases_lista[:10]  # Limitar a 10 frases
+
+        # Manejo de las imágenes subidas
         imagenes_subidas = request.files.getlist(form.imagenes.name)
         imagenes_guardadas = []
         for imagen in imagenes_subidas:
@@ -78,10 +59,10 @@ def index():
                 imagen.save(image_path)
                 imagenes_guardadas.append(image_path)
             else:
-                flash('Algunas imágenes no tienen un formato permitido. Solo se permiten archivos PNG, JPG, JPEG y GIF.', 'danger')
+                flash('Formato de archivo no permitido. Solo se permiten PNG, JPG, JPEG y GIF.', 'danger')
                 return redirect(url_for('index'))
 
-        # Crear el bot
+        # Creación y login del bot
         bot = FacebookMarketplaceBot(username, password)
         try:
             bot.login()
@@ -101,9 +82,10 @@ def index():
 
             assigned_location = localidades_asignadas[i]
 
+            # Seleccionar imágenes no publicadas aún
             imagenes_disponibles = list(set(imagenes_guardadas) - imagenes_publicadas)
 
-            if len(imagenes_disponibles) == 0:
+            if not imagenes_disponibles:
                 imagenes_publicadas.clear()
                 imagenes_disponibles = imagenes_guardadas
 
@@ -121,26 +103,19 @@ def index():
                     flash(f'Error al modificar la imagen: {str(e)}', 'danger')
                     continue
 
-            imagenes_restantes = [img for img in imagenes_guardadas if img != primera_imagen]
-
             imagenes_para_publicar = [modified_image_path]
+            imagenes_restantes = [img for img in imagenes_guardadas if img != primera_imagen]
+            max_fotos_a_cargar = min(18, len(imagenes_restantes))
 
-            max_fotos_a_cargar = max(18, len(imagenes_restantes))
-            contador_imagenes = 1
-
-            while contador_imagenes < max_fotos_a_cargar + 1 and imagenes_restantes:
-                imagen_random = random.choice(imagenes_restantes)
-                imagenes_para_publicar.append(imagen_random)
-                imagenes_restantes.remove(imagen_random)
-                contador_imagenes += 1
+            for imagen in random.sample(imagenes_restantes, max_fotos_a_cargar):
+                imagenes_para_publicar.append(imagen)
 
             try:
-                # Llamar al bot con la descripción formateada
-                bot.complete_form(form_data, descripcion_formateada, imagenes_para_publicar, [assigned_location])
+                bot.complete_form(form_data, descripcion, imagenes_para_publicar, [assigned_location])
                 bot.click_button("Publicar")
                 print(f"Publicación {i + 1}/{num_publications} completada.")
             except Exception as e:
-                flash(f'Error al realizar la publicación {i + 1}: {str(e)}', 'danger')
+                flash(f'Error en la publicación {i + 1}: {str(e)}', 'danger')
                 continue
 
             time.sleep(random.uniform(30, 60))
@@ -152,5 +127,5 @@ def index():
     return render_template('index.html', form=form)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render asignará el puerto automáticamente
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

@@ -1,8 +1,8 @@
-import time 
+import time
 import uuid
 import requests
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit  # Importar SocketIO
 from forms import PublicationForm
 from localidades import localidades_argentinas
 import random, os
@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['MODIFIED_UPLOAD_FOLDER'] = 'modified_uploads/'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Máximo 16 MB
 
 # Crear instancias de SocketIO
 socketio = SocketIO(app)
@@ -87,11 +87,6 @@ def index():
         return redirect(url_for('index'))
 
     return render_template('index.html', form=form)
-
-@socketio.on('progress_update')
-def handle_progress_update(data):
-    """Manejar actualizaciones de progreso enviadas por app2.py."""
-    socketio.emit('progress', {'message': data['message']})  # Reenviar a clientes conectados
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

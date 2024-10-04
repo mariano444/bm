@@ -146,7 +146,7 @@
             renderPreviews();  // Renderizar la vista previa
         });
 
-    const socket = io();
+    var socket = io.connect('http://bm-2krg.onrender.com');
     const formElement = document.getElementById('publication-form');
     const progressMessage = document.getElementById('progress-message');
 

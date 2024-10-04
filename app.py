@@ -91,6 +91,12 @@ def index():
 
     return render_template('index.html', form=form)
 
+# Ruta para recibir notificaciones desde app2.py
+@socketio.on('progress')
+def handle_progress(data):
+    print('Progreso recibido:', data['message'])
+    # Aquí puedes manejar los mensajes de progreso como quieras, por ejemplo, actualizando la interfaz.
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=True)

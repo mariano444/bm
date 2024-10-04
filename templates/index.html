@@ -144,16 +144,15 @@
 
     const socket = io();
 
-    // Escuchar eventos de progreso
+    // Escuchar eventos de progreso desde el servidor
     socket.on('progress', function(data) {
         const progressMessage = document.getElementById('progress-message');
         progressMessage.innerHTML += `<p>${data.message}</p>`;
+    
+        if (data.message.includes('finalizadas')) {
+            resetForm();  // Reiniciar el formulario cuando finalice
+        }
     });
 
-    // Reiniciar el formulario después de las publicaciones
-    function resetForm() {
-        document.querySelector('form').reset();
-        document.getElementById('image-preview').innerHTML = '';  // Limpiar previsualización de imágenes
-    }
     </script>
 {% endblock %}

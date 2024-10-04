@@ -17,7 +17,7 @@ class PublicationForm(FlaskForm):
     descripcion = TextAreaField('Descripción', validators=[DataRequired()])
 
     # Cambiar 'frases' a 'phrases' para hacer coincidir con el HTML
-    phrases = TextAreaField('Frases (,)', validators=[DataRequired()])
+    phrases = TextAreaField('Frases (las frases separadas con , (coma))', validators=[DataRequired()])
     
     # Campo para subir imágenes (máximo 30)
     imagenes = FileField('Subir imágenes', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Solo imágenes JPG y PNG!')])

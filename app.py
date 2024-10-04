@@ -32,12 +32,11 @@ def index():
     form.localidad.choices = [(loc, loc) for loc in localidades_argentinas]
 
     if form.validate_on_submit():
-        # Capturar datos y procesar el formulario
+        # Capturar datos del formulario
         username = form.username.data
         password = form.password.data
         num_publications = form.num_publications.data
         selected_localities = form.localidad.data
-
         frases_usuario = form.phrases.data
         frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()]
 
@@ -75,6 +74,10 @@ def index():
         files = [('imagenes', (os.path.basename(image), open(image, 'rb'), 'image/jpeg')) for image in imagenes_guardadas]
 
         try:
+            # Emitir evento de inicio de progreso
+            socketio.emit('progress', {'message': 'Publicaciones en progreso...'})
+
+            # Enviar los datos al endpoint externo
             response = requests.post('https://3464-181-99-182-19.ngrok-free.app/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')

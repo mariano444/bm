@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 from forms import PublicationForm
 import os, requests
 from werkzeug.utils import secure_filename
+from localidades import localidades_argentinas
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'

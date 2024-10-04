@@ -17,3 +17,23 @@ h2 {
     background-color: #f39c12;
     border-color: #f39c12;
 }
+.alert {
+    margin-top: 20px;
+}
+
+.animate__animated {
+    animation-duration: 1s;
+}
+
+.animate__fadeIn {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

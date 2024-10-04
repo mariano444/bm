@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_socketio import SocketIO
 from forms import PublicationForm
 import os, requests
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -10,6 +11,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Crear carpetas si no existen
 os.makedirs('uploads', exist_ok=True)
 os.makedirs('modified_uploads', exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -40,7 +44,7 @@ def index():
         for imagen in imagenes_subidas:
             if imagen and allowed_file(imagen.filename):
                 filename = secure_filename(imagen.filename)
-                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image_path = os.path.join('uploads', filename)
                 imagen.save(image_path)
                 imagenes_guardadas.append(image_path)
 
@@ -59,7 +63,7 @@ def index():
 
         files = [('imagenes', (os.path.basename(image), open(image, 'rb'), 'image/jpeg')) for image in imagenes_guardadas]
 
-         try:
+        try:
             response = requests.post('https://3464-181-99-182-19.ngrok-free.app/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')

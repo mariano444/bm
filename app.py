@@ -1,30 +1,15 @@
-import time
-import uuid
-import requests
-from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
-from flask_socketio import SocketIO, emit  # Importar SocketIO
+from flask import Flask, render_template, redirect, url_for, flash, request
+from flask_socketio import SocketIO
 from forms import PublicationForm
-from localidades import localidades_argentinas
-import random, os
-from werkzeug.utils import secure_filename
+import os, requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['UPLOAD_FOLDER'] = 'uploads/'
-app.config['MODIFIED_UPLOAD_FOLDER'] = 'modified_uploads/'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Máximo 16 MB
-
-# Crear instancias de SocketIO
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Crear carpetas si no existen
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['MODIFIED_UPLOAD_FOLDER'], exist_ok=True)
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+os.makedirs('uploads', exist_ok=True)
+os.makedirs('modified_uploads', exist_ok=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -74,11 +59,10 @@ def index():
 
         files = [('imagenes', (os.path.basename(image), open(image, 'rb'), 'image/jpeg')) for image in imagenes_guardadas]
 
-        try:
+         try:
             response = requests.post('https://3464-181-99-182-19.ngrok-free.app/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')
-                socketio.emit('progress', {'message': 'Publicaciones finalizadas'})  # Emitir evento final
             else:
                 flash(f'Error en el bot local: {response.text}', 'danger')
         except Exception as e:
@@ -88,6 +72,10 @@ def index():
 
     return render_template('index.html', form=form)
 
+# Manejar mensajes de progreso de app1.py
+@socketio.on('progress')
+def handle_progress(data):
+    emit('progress', data, broadcast=True)
+
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    socketio.run(app, host='0.0.0.0', port=port, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

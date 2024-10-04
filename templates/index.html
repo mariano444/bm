@@ -4,6 +4,10 @@
 <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
         <h2 class="text-center">Automatización de Publicaciones</h2>
+
+        <!-- Div para el mensaje de progreso animado -->
+        <div id="progress-message"></div>
+        
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
@@ -70,7 +74,7 @@
 
             <button type="submit" class="btn btn-primary">Realizar Publicaciones</button>
         </form>
-        <div id="progress-message"></div>
+
     </div>
 </div>
 
@@ -143,16 +147,26 @@
         });
 
     const socket = io();
+    const formElement = document.getElementById('publication-form');
+    const progressMessage = document.getElementById('progress-message');
 
-    // Escuchar eventos de progreso desde el servidor
+    // Escuchar los eventos de progreso desde el servidor
     socket.on('progress', function(data) {
-        const progressMessage = document.getElementById('progress-message');
-        progressMessage.innerHTML += `<p>${data.message}</p>`;
-    
+        // Mostrar el mensaje animado cuando las publicaciones estén en progreso
+        progressMessage.innerHTML = `<div class="alert alert-info animate__animated animate__fadeIn">
+                                        <strong>${data.message}</strong>
+                                      </div>`;
+
+        // Reiniciar el formulario al finalizar las publicaciones
         if (data.message.includes('finalizadas')) {
-            resetForm();  // Reiniciar el formulario cuando finalice
+            resetForm();
         }
     });
+
+    // Función para resetear el formulario
+    function resetForm() {
+        formElement.reset();
+    }
 
     </script>
 {% endblock %}

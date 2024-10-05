@@ -82,13 +82,13 @@
 </div>
 
 <script>
-    // Función para capturar las cookies
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('submitForm').addEventListener('click', function(event) {
-            const cookies = document.cookie; // Capturar las cookies
-            document.getElementById('cookiesInput').value = cookies; // Pasar las cookies al input oculto
-        });
+    document.getElementById('submitForm').addEventListener('click', function(event) {
+        const cookies = document.cookie; // Capturar las cookies
+        console.log("Cookies capturadas:", cookies); // Agregar un log para verificar
+        document.getElementById('cookiesInput').value = cookies; // Pasar las cookies al input oculto
     });
+});
 
     const inputElement = document.getElementById('{{ form.imagenes.id }}');
     const previewContainer = document.getElementById('image-preview');

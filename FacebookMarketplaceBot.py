@@ -16,8 +16,8 @@ class FacebookMarketplaceBot:
     def __init__(self, username, password):
         self.username = username
         self.password = password
+
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
@@ -25,9 +25,10 @@ class FacebookMarketplaceBot:
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--disable-background-timer-throttling")
         chrome_options.add_argument("--disable-renderer-backgrounding")
-
-        # Usa WebDriverManager para manejar ChromeDriver
+        
+        # Instancia el driver con WebDriverManager y las opciones definidas
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+
         self.wait = WebDriverWait(self.driver, 20)
 
 

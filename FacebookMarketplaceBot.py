@@ -10,19 +10,26 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from image_editor import apply_professional_design
+from webdriver_manager.chrome import ChromeDriverManager
 
 class FacebookMarketplaceBot:
     def __init__(self, username, password):
         self.username = username
         self.password = password
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")  # Ejecutar en modo headless
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
-        self.driver = webdriver.Chrome(options=chrome_options)
+        chrome_options.add_argument("--window-size=1920x1080")
+        chrome_options.add_argument("--disable-software-rasterizer")
+        chrome_options.add_argument("--disable-background-timer-throttling")
+        chrome_options.add_argument("--disable-renderer-backgrounding")
+
+        # Usa WebDriverManager para manejar ChromeDriver
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
+
 
     def login(self):
         try:

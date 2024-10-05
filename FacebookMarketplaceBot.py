@@ -2,7 +2,6 @@ import os
 import random
 import time
 import cv2
-import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -10,27 +9,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from image_editor import apply_professional_design
-from webdriver_manager.chrome import ChromeDriverManager
+from localidades import localidades_argentinas
 
 class FacebookMarketplaceBot:
     def __init__(self, username, password):
         self.username = username
         self.password = password
-
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920x1080")
-        chrome_options.add_argument("--disable-software-rasterizer")
-        chrome_options.add_argument("--disable-background-timer-throttling")
-        chrome_options.add_argument("--disable-renderer-backgrounding")
-        
-        # Instancia el driver con WebDriverManager y las opciones definidas
-        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-
+        chrome_options.add_argument("--disable-gpu")  # Desactivar GPU
+        chrome_options.add_argument("--window-size=1920x1080")  # Tamaño de ventana
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
-
 
     def login(self):
         try:
@@ -41,12 +30,10 @@ class FacebookMarketplaceBot:
             password_field.send_keys(self.password)
             password_field.submit()
             self.wait.until(EC.url_contains("https://www.facebook.com/?sk=h_chr"))
-            logging.info("Inicio de sesión exitoso.")
+            print("Inicio de sesión exitoso.")
         except TimeoutException:
-            logging.error("Tiempo de espera agotado durante el inicio de sesión.")
             raise Exception("Tiempo de espera agotado durante el inicio de sesión.")
         except NoSuchElementException:
-            logging.error("No se encontraron los campos de correo electrónico o contraseña.")
             raise Exception("No se encontraron los campos de correo electrónico o contraseña.")
 
     def complete_form(self, form_data, description, imagenes, selected_locations):
@@ -81,19 +68,23 @@ class FacebookMarketplaceBot:
                 self.click_first_location_result()
 
             self.upload_photos(imagenes)
+            self.click_button("Siguiente")
         except Exception as e:
-            logging.error(f"Error al completar el formulario: {str(e)}")
-            raise e
+            raise Exception(f"Error al completar el formulario: {e}")
 
-    def upload_photos(self, image_paths):
+    def upload_photos(self, imagenes):
         try:
-            upload_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']")))
-            for image_path in image_paths:
-                upload_button.send_keys(image_path)
-                time.sleep(2)
+            max_photos = 10
+            imagenes = imagenes[:max_photos]
+
+            for imagen_path in imagenes:
+                absolute_path = os.path.abspath(imagen_path)
+                input_field = self.driver.find_element(By.XPATH, "//input[@type='file']")
+                input_field.send_keys(absolute_path)
+                time.sleep(1)
+                self.driver.execute_script('arguments[0].value=""', input_field)
         except Exception as e:
-            logging.error(f"Error al subir las fotos: {str(e)}")
-            raise e
+            raise Exception(f"Error al cargar las imágenes: {e}")
 
     def modify_and_save_photo(self, original_path, modified_path, frases):
         try:
@@ -148,11 +139,5 @@ class FacebookMarketplaceBot:
         except TimeoutException:
             raise Exception("No se pudo seleccionar la ubicación.")
 
-
     def close_browser(self):
-        try:
-            self.driver.quit()
-            logging.info("Navegador cerrado correctamente.")
-        except Exception as e:
-            logging.error(f"Error al cerrar el navegador: {str(e)}")
-            raise e
+        self.driver.quit()

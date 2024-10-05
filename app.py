@@ -90,7 +90,7 @@ def index():
             socketio.emit('progress', {'message': 'Publicaciones en progreso...'})
 
             # Enviar los datos al endpoint externo
-            response = requests.post('https://3464-181-99-182-19.ngrok-free.app/process', data=data, files=files)
+            response = requests.post('https://7c0f-181-99-182-19.ngrok-free.app/process', data=data, files=files)
             if response.status_code == 200:
                 flash('Publicaciones realizadas con éxito!', 'success')
                 socketio.emit('progress', {'message': 'Publicaciones finalizadas'})  # Emitir evento final

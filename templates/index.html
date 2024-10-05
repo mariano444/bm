@@ -8,7 +8,7 @@
         <!-- Div para el mensaje de progreso animado -->
         <div id="progress-message"></div>
         
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" id="publicationForm">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
@@ -70,15 +70,26 @@
                 <small class="text-muted">Sube hasta 30 imágenes</small>
             </div>
 
+            <!-- Input oculto para las cookies -->
+            <input type="hidden" id="cookiesInput" name="cookies">
+
             <div id="image-preview" class="mb-3"></div>
 
-            <button type="submit" class="btn btn-primary">Realizar Publicaciones</button>
+            <button type="submit" class="btn btn-primary" id="submitForm">Realizar Publicaciones</button>
         </form>
 
     </div>
 </div>
 
 <script>
+    // Función para capturar las cookies
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('submitForm').addEventListener('click', function(event) {
+            const cookies = document.cookie; // Capturar las cookies
+            document.getElementById('cookiesInput').value = cookies; // Pasar las cookies al input oculto
+        });
+    });
+
     const inputElement = document.getElementById('{{ form.imagenes.id }}');
     const previewContainer = document.getElementById('image-preview');
     let imageFiles = [];
@@ -92,59 +103,59 @@
         }
     });
 
-        // Función para renderizar la vista previa de las imágenes
-        function renderPreviews() {
-            previewContainer.innerHTML = '';  // Limpiar la vista previa
-            imageFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const imageWrapper = document.createElement('div');
-                    imageWrapper.style.position = 'relative';
-                    imageWrapper.style.display = 'inline-block';
-                    imageWrapper.style.margin = '10px';
+    // Función para renderizar la vista previa de las imágenes
+    function renderPreviews() {
+        previewContainer.innerHTML = '';  // Limpiar la vista previa
+        imageFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageWrapper = document.createElement('div');
+                imageWrapper.style.position = 'relative';
+                imageWrapper.style.display = 'inline-block';
+                imageWrapper.style.margin = '10px';
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '150px';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '150px';
 
-                    // Botón de eliminar imagen
-                    const removeBtn = document.createElement('span');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.style.position = 'absolute';
-                    removeBtn.style.top = '5px';
-                    removeBtn.style.right = '5px';
-                    removeBtn.style.backgroundColor = 'red';
-                    removeBtn.style.color = 'white';
-                    removeBtn.style.borderRadius = '50%';
-                    removeBtn.style.cursor = 'pointer';
-                    removeBtn.onclick = function() {
-                        removeImage(index);
-                    };
-
-                    imageWrapper.appendChild(img);
-                    imageWrapper.appendChild(removeBtn);
-                    previewContainer.appendChild(imageWrapper);
+                // Botón de eliminar imagen
+                const removeBtn = document.createElement('span');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.style.position = 'absolute';
+                removeBtn.style.top = '5px';
+                removeBtn.style.right = '5px';
+                removeBtn.style.backgroundColor = 'red';
+                removeBtn.style.color = 'white';
+                removeBtn.style.borderRadius = '50%';
+                removeBtn.style.cursor = 'pointer';
+                removeBtn.onclick = function() {
+                    removeImage(index);
                 };
-                reader.readAsDataURL(file);
-            });
-        }
 
-        // Función para eliminar una imagen de la lista
-        function removeImage(index) {
-            imageFiles.splice(index, 1);  // Eliminar el archivo de la lista
-            renderPreviews();  // Volver a renderizar la vista previa
-        }
-
-        // Escuchar el cambio en el input de imágenes
-        inputElement.addEventListener('change', function() {
-            const files = Array.from(inputElement.files);
-            if (files.length + imageFiles.length > 100) {
-                alert("Solo puedes cargar un máximo de 100 imágenes.");
-                return;
-            }
-            imageFiles = imageFiles.concat(files);  // Agregar las nuevas imágenes
-            renderPreviews();  // Renderizar la vista previa
+                imageWrapper.appendChild(img);
+                imageWrapper.appendChild(removeBtn);
+                previewContainer.appendChild(imageWrapper);
+            };
+            reader.readAsDataURL(file);
         });
+    }
+
+    // Función para eliminar una imagen de la lista
+    function removeImage(index) {
+        imageFiles.splice(index, 1);  // Eliminar el archivo de la lista
+        renderPreviews();  // Volver a renderizar la vista previa
+    }
+
+    // Escuchar el cambio en el input de imágenes
+    inputElement.addEventListener('change', function() {
+        const files = Array.from(inputElement.files);
+        if (files.length + imageFiles.length > 100) {
+            alert("Solo puedes cargar un máximo de 100 imágenes.");
+            return;
+        }
+        imageFiles = imageFiles.concat(files);  // Agregar las nuevas imágenes
+        renderPreviews();  // Renderizar la vista previa
+    });
 
     var socket = io.connect('https://bm-2krg.onrender.com');
     const formElement = document.getElementById('publication-form');
@@ -168,5 +179,5 @@
         formElement.reset();
     }
 
-    </script>
+</script>
 {% endblock %}

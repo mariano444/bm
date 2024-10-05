@@ -89,8 +89,6 @@ if form.validate_on_submit():
     except Exception as e:
         flash(f'Error al enviar los datos al bot local: {str(e)}', 'danger')
 
-      return redirect(url_for('index'))
-
     return render_template('index.html', form=form)
 
 if __name__ == '__main__':

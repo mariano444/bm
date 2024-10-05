@@ -1,5 +1,6 @@
 import time
 import uuid
+import logging
 from flask import Flask, render_template, redirect, url_for, flash, request
 from forms import PublicationForm
 from FacebookMarketplaceBot import FacebookMarketplaceBot
@@ -7,18 +8,8 @@ from localidades import localidades_argentinas
 import random, os
 from werkzeug.utils import secure_filename
 
-# Función para formatear la descripción
-#def formatear_descripcion(texto):
-    # Dividir el texto en líneas
-    #lineas = texto.split('\n')
-    
-    # Limpiar las líneas y agregar \n para cada línea
-    #lineas_limpias = [f'"{linea.strip()} \\n"' for linea in lineas if linea.strip()]
-    
-    # Formatear el bloque como un string multilínea para el código Python
- #   descripcion_formateada = 'description = (\n' + '    '.join(lineas_limpias) + '\n)'
-    
-  #  return descripcion_formateada
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configurar la aplicación Flask
 app = Flask(__name__)
@@ -50,7 +41,6 @@ def index():
         num_publications = form.num_publications.data
         selected_localities = form.localidad.data
 
-        # Capturar las frases ingresadas por el usuario
         frases_usuario = form.phrases.data
         frases_lista = [frase.strip() for frase in frases_usuario.split(",") if frase.strip()] 
 
@@ -64,11 +54,8 @@ def index():
         precio = form.precio.data
         millaje = form.millaje.data
         descripcion = form.descripcion.data
-        
-        # Aquí es donde se formatea la descripción formatear_descripcion(descripcion) antes de usarla en el bot
         descripcion_formateada = descripcion
 
-        # Manejar las imágenes subidas
         imagenes_subidas = request.files.getlist(form.imagenes.name)
         imagenes_guardadas = []
         for imagen in imagenes_subidas:
@@ -86,6 +73,7 @@ def index():
         try:
             bot.login()
         except Exception as e:
+            logging.error(f'Error al iniciar sesión: {str(e)}')
             flash(f'Error al iniciar sesión: {str(e)}', 'danger')
             return redirect(url_for('index'))
 
@@ -118,13 +106,13 @@ def index():
                 try:
                     modified_image_path = bot.modify_and_save_photo(primera_imagen, modified_image_path, frases_lista)
                 except Exception as e:
+                    logging.error(f'Error al modificar la imagen: {str(e)}')
                     flash(f'Error al modificar la imagen: {str(e)}', 'danger')
                     continue
 
             imagenes_restantes = [img for img in imagenes_guardadas if img != primera_imagen]
 
             imagenes_para_publicar = [modified_image_path]
-
             max_fotos_a_cargar = max(18, len(imagenes_restantes))
             contador_imagenes = 1
 
@@ -135,11 +123,11 @@ def index():
                 contador_imagenes += 1
 
             try:
-                # Llamar al bot con la descripción formateada
                 bot.complete_form(form_data, descripcion_formateada, imagenes_para_publicar, [assigned_location])
                 bot.click_button("Publicar")
-                print(f"Publicación {i + 1}/{num_publications} completada.")
+                logging.info(f"Publicación {i + 1}/{num_publications} completada.")
             except Exception as e:
+                logging.error(f'Error al realizar la publicación {i + 1}: {str(e)}')
                 flash(f'Error al realizar la publicación {i + 1}: {str(e)}', 'danger')
                 continue
 
@@ -155,4 +143,3 @@ def index():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Render asignará el puerto automáticamente
     app.run(host='0.0.0.0', port=port, debug=True)
-

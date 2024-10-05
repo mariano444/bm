@@ -21,7 +21,6 @@ class FacebookMarketplaceBot:
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920x1080")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
 
